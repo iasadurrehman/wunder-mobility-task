@@ -5266,6 +5266,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var debounce__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! debounce */ "./node_modules/debounce/index.js");
+/* harmony import */ var debounce__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(debounce__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue_cookies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue-cookies */ "./node_modules/vue-cookies/vue-cookies.js");
+/* harmony import */ var vue_cookies__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_cookies__WEBPACK_IMPORTED_MODULE_1__);
 //
 //
 //
@@ -5282,9 +5286,152 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      page: 1,
+      formFields: {
+        firstName: '',
+        lastName: '',
+        telephone: '',
+        street: '',
+        house: '',
+        zip: '',
+        city: '',
+        accOwner: '',
+        iban: ''
+      },
+      error: false
+    };
+  },
   mounted: function mounted() {
-    console.log('Component mounted.');
+    var cookieData = $cookies.get('_wunder_mobility_task');
+    this.formFields = cookieData.fields;
+    this.page = cookieData.page;
+  },
+  methods: {
+    navigateForward: function navigateForward() {
+      this.page++;
+    },
+    navigateBack: function navigateBack() {
+      this.page--;
+    },
+    submit: function submit() {
+      var validated = this.validate();
+
+      if (validated) {
+        axios.post('/submit', this.formFields).then(function (response) {});
+      }
+    },
+    validate: function validate() {
+      for (var i in this.formFields) {
+        if (this.formFields[i] === '') {
+          this.error = true;
+          return false;
+        }
+      }
+
+      return true;
+    },
+    debounceSession: _.debounce(function (e) {
+      $cookies.set('_wunder_mobility_task', {
+        fields: this.formFields,
+        page: this.page
+      });
+    }, 500)
   }
 });
 
@@ -10386,6 +10533,86 @@ defineJQueryPlugin(Toast);
 
 
 //# sourceMappingURL=bootstrap.esm.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/debounce/index.js":
+/*!****************************************!*\
+  !*** ./node_modules/debounce/index.js ***!
+  \****************************************/
+/***/ ((module) => {
+
+/**
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing. The function also has a property 'clear' 
+ * that is a function which will clear the timer to prevent previously scheduled executions. 
+ *
+ * @source underscore.js
+ * @see http://unscriptable.com/2009/03/20/debouncing-javascript-methods/
+ * @param {Function} function to wrap
+ * @param {Number} timeout in ms (`100`)
+ * @param {Boolean} whether to execute at the beginning (`false`)
+ * @api public
+ */
+function debounce(func, wait, immediate){
+  var timeout, args, context, timestamp, result;
+  if (null == wait) wait = 100;
+
+  function later() {
+    var last = Date.now() - timestamp;
+
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last);
+    } else {
+      timeout = null;
+      if (!immediate) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+    }
+  };
+
+  var debounced = function(){
+    context = this;
+    args = arguments;
+    timestamp = Date.now();
+    var callNow = immediate && !timeout;
+    if (!timeout) timeout = setTimeout(later, wait);
+    if (callNow) {
+      result = func.apply(context, args);
+      context = args = null;
+    }
+
+    return result;
+  };
+
+  debounced.clear = function() {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+  
+  debounced.flush = function() {
+    if (timeout) {
+      result = func.apply(context, args);
+      context = args = null;
+      
+      clearTimeout(timeout);
+      timeout = null;
+    }
+  };
+
+  return debounced;
+};
+
+// Adds compatibility for ES modules
+debounce.debounce = debounce;
+
+module.exports = debounce;
 
 
 /***/ }),
@@ -27809,6 +28036,161 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/vue-cookies/vue-cookies.js":
+/*!*************************************************!*\
+  !*** ./node_modules/vue-cookies/vue-cookies.js ***!
+  \*************************************************/
+/***/ ((module) => {
+
+/**
+ * Vue Cookies v1.8.1
+ * https://github.com/cmp-cc/vue-cookies
+ *
+ * Copyright 2016, cmp-cc
+ * Released under the MIT license
+ */
+
+ (function () {
+
+  var defaultConfig = {
+    expires: '1d',
+    path: '; path=/',
+    domain: '',
+    secure: '',
+    sameSite: '; SameSite=Lax'
+  };
+
+  var VueCookies = {
+    // install of Vue
+    install: function (Vue, options) {
+      if (options) this.config(options.expires, options.path, options.domain, options.secure, options.sameSite);
+      if (Vue.prototype) Vue.prototype.$cookies = this;
+      if (Vue.config && Vue.config.globalProperties) {
+        Vue.config.globalProperties.$cookies = this;
+        Vue.provide('$cookies', this);
+      }
+      Vue.$cookies = this;
+    },
+    config: function (expires, path, domain, secure, sameSite) {
+      defaultConfig.expires = expires ? expires : '1d';
+      defaultConfig.path = path ? '; path=' + path : '; path=/';
+      defaultConfig.domain = domain ? '; domain=' + domain : '';
+      defaultConfig.secure = secure ? '; Secure' : '';
+      defaultConfig.sameSite = sameSite ? '; SameSite=' + sameSite : '; SameSite=Lax';
+    },
+    get: function (key) {
+      var value = decodeURIComponent(document.cookie.replace(new RegExp('(?:(?:^|.*;)\\s*' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=\\s*([^;]*).*$)|^.*$'), '$1')) || null;
+
+      if (value && value.substring(0, 1) === '{' && value.substring(value.length - 1, value.length) === '}') {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          return value;
+        }
+      }
+      return value;
+    },
+    set: function (key, value, expires, path, domain, secure, sameSite) {
+      if (!key) {
+        throw new Error('Cookie name is not found in the first argument.');
+      } else if (/^(?:expires|max\-age|path|domain|secure|SameSite)$/i.test(key)) {
+        throw new Error('Cookie name illegality. Cannot be set to ["expires","max-age","path","domain","secure","SameSite"]\t current key name: ' + key);
+      }
+      // support json object
+      if (value && value.constructor === Object) {
+        value = JSON.stringify(value);
+      }
+      var _expires = '';
+      expires = expires == undefined ? defaultConfig.expires : expires;
+      if (expires && expires != 0) {
+        switch (expires.constructor) {
+          case Number:
+            if (expires === Infinity || expires === -1) _expires = '; expires=Fri, 31 Dec 9999 23:59:59 GMT';
+            else _expires = '; max-age=' + expires;
+            break;
+          case String:
+            if (/^(?:\d+(y|m|d|h|min|s))$/i.test(expires)) {
+              // get capture number group
+              var _expireTime = expires.replace(/^(\d+)(?:y|m|d|h|min|s)$/i, '$1');
+              // get capture type group , to lower case
+              switch (expires.replace(/^(?:\d+)(y|m|d|h|min|s)$/i, '$1').toLowerCase()) {
+                  // Frequency sorting
+                case 'm':
+                  _expires = '; max-age=' + +_expireTime * 2592000;
+                  break; // 60 * 60 * 24 * 30
+                case 'd':
+                  _expires = '; max-age=' + +_expireTime * 86400;
+                  break; // 60 * 60 * 24
+                case 'h':
+                  _expires = '; max-age=' + +_expireTime * 3600;
+                  break; // 60 * 60
+                case 'min':
+                  _expires = '; max-age=' + +_expireTime * 60;
+                  break; // 60
+                case 's':
+                  _expires = '; max-age=' + _expireTime;
+                  break;
+                case 'y':
+                  _expires = '; max-age=' + +_expireTime * 31104000;
+                  break; // 60 * 60 * 24 * 30 * 12
+                default:
+                  new Error('unknown exception of "set operation"');
+              }
+            } else {
+              _expires = '; expires=' + expires;
+            }
+            break;
+          case Date:
+            _expires = '; expires=' + expires.toUTCString();
+            break;
+        }
+      }
+      document.cookie =
+          encodeURIComponent(key) + '=' + encodeURIComponent(value) +
+          _expires +
+          (domain ? '; domain=' + domain : defaultConfig.domain) +
+          (path ? '; path=' + path : defaultConfig.path) +
+          (secure == undefined ? defaultConfig.secure : secure ? '; Secure' : '') +
+          (sameSite == undefined ? defaultConfig.sameSite : (sameSite ? '; SameSite=' + sameSite : ''));
+      return this;
+    },
+    remove: function (key, path, domain) {
+      if (!key || !this.isKey(key)) {
+        return false;
+      }
+      document.cookie = encodeURIComponent(key) +
+          '=; expires=Thu, 01 Jan 1970 00:00:00 GMT' +
+          (domain ? '; domain=' + domain : defaultConfig.domain) +
+          (path ? '; path=' + path : defaultConfig.path) +
+          '; SameSite=Lax';
+      return true;
+    },
+    isKey: function (key) {
+      return (new RegExp('(?:^|;\\s*)' + encodeURIComponent(key).replace(/[\-\.\+\*]/g, '\\$&') + '\\s*\\=')).test(document.cookie);
+    },
+    keys: function () {
+      if (!document.cookie) return [];
+      var _keys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, '').split(/\s*(?:\=[^;]*)?;\s*/);
+      for (var _index = 0; _index < _keys.length; _index++) {
+        _keys[_index] = decodeURIComponent(_keys[_index]);
+      }
+      return _keys;
+    }
+  };
+
+  if (true) {
+    module.exports = VueCookies;
+  } else {}
+  // vue-cookies can exist independently,no dependencies library
+  if (typeof window !== 'undefined') {
+    window.$cookies = VueCookies;
+  }
+
+})();
+
+
+/***/ }),
+
 /***/ "./resources/js/components/RegisterComponent.vue":
 /*!*******************************************************!*\
   !*** ./resources/js/components/RegisterComponent.vue ***!
@@ -27897,32 +28279,415 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
-}
-var staticRenderFns = [
-  function () {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "card" }, [
-            _c("div", { staticClass: "card-header" }, [
-              _vm._v("Example Component"),
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _vm._v(
-                "\n                    I'm an example component.\n                "
-              ),
-            ]),
+  return _c("div", { staticClass: "container" }, [
+    _c("div", { staticClass: "row justify-content-center" }, [
+      _c("div", { staticClass: "col-md-8" }, [
+        _c("div", { staticClass: "card" }, [
+          _c("div", { staticClass: "card-header" }, [
+            _vm._v("Registration Form"),
           ]),
+          _vm._v(" "),
+          _vm.page === 1
+            ? _c("div", { staticClass: "card-body" }, [
+                _c("table", [
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                              First name:\n                          "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.firstName,
+                            expression: "formFields.firstName",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "first_name", type: "text" },
+                        domProps: { value: _vm.formFields.firstName },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "firstName",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                              Last name:\n                          "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.lastName,
+                            expression: "formFields.lastName",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "last_name", type: "text" },
+                        domProps: { value: _vm.formFields.lastName },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "lastName",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                              Telephone:\n                          "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.telephone,
+                            expression: "formFields.telephone",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "telephone", type: "tel" },
+                        domProps: { value: _vm.formFields.telephone },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "telephone",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                ]),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary text-right",
+                    on: { click: _vm.navigateForward },
+                  },
+                  [_vm._v("Next")]
+                ),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.page === 2
+            ? _c("div", { staticClass: "card-body" }, [
+                _c("table", [
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                Street Address:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.street,
+                            expression: "formFields.street",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "street", type: "text" },
+                        domProps: { value: _vm.formFields.street },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "street",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                House Number:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.house,
+                            expression: "formFields.house",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "house", type: "text" },
+                        domProps: { value: _vm.formFields.house },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "house",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                Zip Code:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.zip,
+                            expression: "formFields.zip",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "zip", type: "text" },
+                        domProps: { value: _vm.formFields.zip },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(_vm.formFields, "zip", $event.target.value)
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                City:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.city,
+                            expression: "formFields.city",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "city", type: "text" },
+                        domProps: { value: _vm.formFields.city },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "city",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                ]),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary text-right",
+                    on: { click: _vm.navigateBack },
+                  },
+                  [_vm._v("Previous")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary text-right",
+                    on: { click: _vm.navigateForward },
+                  },
+                  [_vm._v("Next")]
+                ),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.page === 3
+            ? _c("div", { staticClass: "card-body" }, [
+                _c("table", [
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                Account Owner:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.accOwner,
+                            expression: "formFields.accOwner",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "accOwner", type: "text" },
+                        domProps: { value: _vm.formFields.accOwner },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "accOwner",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                  _vm._v(" "),
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                IBAN:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.formFields.iban,
+                            expression: "formFields.iban",
+                          },
+                        ],
+                        staticClass: "form-control",
+                        attrs: { name: "iban", type: "text" },
+                        domProps: { value: _vm.formFields.iban },
+                        on: {
+                          change: _vm.debounceSession,
+                          input: function ($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.formFields,
+                              "iban",
+                              $event.target.value
+                            )
+                          },
+                        },
+                      }),
+                    ]),
+                  ]),
+                ]),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary text-right",
+                    on: { click: _vm.navigateBack },
+                  },
+                  [_vm._v("Previous")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  staticClass: "btn btn-secondary text-right",
+                  attrs: { type: "submit", value: "Submit" },
+                  on: { click: _vm.submit },
+                }),
+                _c("br"),
+                _vm._v(" "),
+                _vm.error
+                  ? _c("span", { staticClass: "btn-danger" }, [
+                      _vm._v(" Please fill all form fields"),
+                    ])
+                  : _vm._e(),
+              ])
+            : _vm._e(),
         ]),
       ]),
-    ])
-  },
-]
+    ]),
+  ])
+}
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -40159,6 +40924,18 @@ module.exports = JSON.parse('{"_args":[["axios@0.21.4","/var/www/wunder-mobility
 /******/ 				}
 /******/ 			}
 /******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
 /******/ 		};
 /******/ 	})();
 /******/ 	

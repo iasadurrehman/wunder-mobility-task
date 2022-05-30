@@ -5377,6 +5377,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -5394,13 +5408,17 @@ __webpack_require__.r(__webpack_exports__);
         accOwner: '',
         iban: ''
       },
+      paymentDataId: '',
       error: false
     };
   },
   mounted: function mounted() {
     var cookieData = $cookies.get('_wunder_mobility_task');
-    this.formFields = cookieData.fields;
-    this.page = cookieData.page;
+
+    if (cookieData !== null) {
+      this.formFields = cookieData.fields;
+      this.page = cookieData.page;
+    }
   },
   methods: {
     navigateForward: function navigateForward() {
@@ -5410,10 +5428,18 @@ __webpack_require__.r(__webpack_exports__);
       this.page--;
     },
     submit: function submit() {
+      var _this = this;
+
       var validated = this.validate();
 
       if (validated) {
-        axios.post('/submit', this.formFields).then(function (response) {});
+        axios.post('/submit', this.formFields).then(function (response) {
+          if (response.data.success) {
+            _this.page++;
+            $cookies.remove('_wunder_mobility_task');
+            _this.paymentDataId = response.data.paymentId;
+          }
+        });
       }
     },
     validate: function validate() {
@@ -28680,6 +28706,28 @@ var render = function () {
                       _vm._v(" Please fill all form fields"),
                     ])
                   : _vm._e(),
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.page === 4
+            ? _c("div", { staticClass: "card-body" }, [
+                _c("table", [
+                  _c("tr", [
+                    _c("td", [
+                      _vm._v(
+                        "\n                                Payment ID:\n                            "
+                      ),
+                    ]),
+                    _vm._v(" "),
+                    _c("td", [
+                      _vm._v(
+                        "\n                                " +
+                          _vm._s(_vm.paymentDataId) +
+                          "\n                            "
+                      ),
+                    ]),
+                  ]),
+                ]),
               ])
             : _vm._e(),
         ]),

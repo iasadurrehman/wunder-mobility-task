@@ -99,6 +99,20 @@
                         <input type="submit" @click="submit" class="btn btn-secondary text-right" value="Submit"><br>
                         <span v-if="error" class="btn-danger"> Please fill all form fields</span>
                     </div>
+
+                    <!-- Page 4 -->
+                    <div class="card-body" v-if="page === 4">
+                        <table>
+                            <tr>
+                                <td>
+                                    Payment ID:
+                                </td>
+                                <td>
+                                    {{paymentDataId}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -124,13 +138,16 @@ import VueCookies from 'vue-cookies';
                     accOwner: '',
                     iban: ''
                 },
+                paymentDataId: '',
                 error: false
             }
         },
         mounted() {
             const cookieData = $cookies.get('_wunder_mobility_task');
-            this.formFields = cookieData.fields;
-            this.page = cookieData.page;
+            if(cookieData !== null) {
+                this.formFields = cookieData.fields;
+                this.page = cookieData.page;
+            }
         },
         methods: {
             navigateForward: function() {
@@ -143,7 +160,11 @@ import VueCookies from 'vue-cookies';
                 const validated = this.validate();
                 if(validated) {
                     axios.post('/submit', this.formFields).then(response => {
-
+                        if(response.data.success){
+                            this.page++;
+                            $cookies.remove('_wunder_mobility_task');
+                            this.paymentDataId = response.data.paymentId;
+                        }
                     })
                 }
             },

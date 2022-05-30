@@ -4,18 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\CustomerPayment;
+use App\Services\PaymentDataService\PaymentDataService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 
 class HomeController extends Controller
 {
+    private $paymentDataService;
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(PaymentDataService $paymentDataService)
     {
-
+        $this->paymentDataService = $paymentDataService;
     }
 
     /**
@@ -38,10 +41,20 @@ class HomeController extends Controller
             'zip' => $request->get('zip'),
             'address' => $request->get('house') .' '. $request->get('street'),
         ]);
-        CustomerPayment::create([
+        $paymentHistory = CustomerPayment::create([
             'owner_name' => $request->get('accOwner'),
             'iban' => $request->get('iban'),
             'customer_id' => $customer->id,
         ]);
+
+        $paymentResponse = $this->paymentDataService->savePaymentInfo(['customerId' => $customer->id,
+                                                    'iban' => $request->get('iban'),
+                                                    'owner' => $request->get('accOwner')]);
+        if($paymentResponse->successful()){
+            CustomerPayment::where('id', '=', $paymentHistory->id)->update(['payment_data_id' => $paymentResponse->json()['paymentDataId']]);
+            return ['success' => true, 'paymentId' => $paymentResponse->json()['paymentDataId']];
+        }
+        return ['success' => false];
+
     }
 }
